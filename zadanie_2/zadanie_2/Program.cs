@@ -18,11 +18,16 @@ public class Container
 
     public Container(double loadMass, double height, double ownWeight, string serialNumber, double maxLoad)
     {
-        this._loadMass = loadMass;
-        this._height = height;
-        this._ownWeight = ownWeight;
-        this._serialNumber = serialNumber;
-        this._maxLoad = maxLoad;
+        _loadMass = loadMass;
+        _height = height;
+        _ownWeight = ownWeight;
+        _serialNumber = serialNumber;
+        _maxLoad = maxLoad;
+    }
+
+    public void EmptyTheLoad()
+    {
+        _loadMass = 0;
     }
 
     public void LoadMass(double massToLoad)
