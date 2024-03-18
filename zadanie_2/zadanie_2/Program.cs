@@ -6,7 +6,76 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        RefrigeratedLoad rl= new RefrigeratedLoad("Banana", -13);
 
+        //Stworzenie kontenerów danego typu
+        
+        //Kontener na gaz
+        GasContainer gasContainer = new GasContainer(321,231,3123131,2313);
+        GasContainer gasContainer2 = new GasContainer(321,231,3123131,2313);
+        
+        //Kontener na płyny
+        LiquidContainer liquidContainer = new LiquidContainer(231123,3213,3213,true);
+        LiquidContainer liquidContainer2 = new LiquidContainer(231123,3213,6000,true);
+        
+        //Kontener chłodniczy
+        RefrigeratedContainer refrigeratedContainer =
+            new RefrigeratedContainer( 12313, 23133123, 312313232, rl, 21);
+        RefrigeratedContainer refrigeratedContainer2 =
+            new RefrigeratedContainer( 12313, 23133123, 312313232, rl, 21);
+        
+        //Załadowanie kontenerów
+        gasContainer.LoadMass(1000);
+        gasContainer2.LoadMass(2000);
+        liquidContainer.LoadMass(1000);
+        liquidContainer2.LoadMass(2000);
+        refrigeratedContainer.LoadMass(1000);
+        refrigeratedContainer2.LoadMass(2000);
+
+        //Swtorzenie kontenerowca
+        ContainerShip containerShip = new ContainerShip(23,2132313,2313123213213);
+        
+        //Stworzenie listy na kontenery i dodanie do niej paru kontenerów
+        List<Container> containers = new List<Container>();
+        containers.Add(gasContainer);
+        containers.Add(liquidContainer);
+        containers.Add(refrigeratedContainer);
+
+        //Załadowanie listy koneterów na kontenerowiec
+        containerShip.LoadListOfContainers(containers);
+        
+        //Załadowanie pojedynczyh koneterów na kontenerowiec
+        containerShip.LoadContainer(gasContainer2);
+        containerShip.LoadContainer(liquidContainer2);
+        containerShip.LoadContainer(refrigeratedContainer2);
+        
+        //Wypisanie specyfikacji kontererowca oraz jego zawartosci
+        Console.WriteLine(containerShip);
+        
+        //Usunięcie kontenera z kontenerowca
+        containerShip.RemoveContainerFromShip(gasContainer);
+        containerShip.RemoveContainerFromShip(liquidContainer);
+        containerShip.RemoveContainerFromShip(refrigeratedContainer);
+        
+        //Wypisanie specyfikacji kontererowca oraz jego zawartosci po usunięciu kontenerów
+        Console.WriteLine(containerShip);
+
+
+        //Zawartość przed rozładowaniem:
+        Console.WriteLine($"Zwartosc przed rozładowaniem -> {gasContainer2}");
+        
+        //Rozładowanie kontenera
+        gasContainer2.EmptyTheLoad();
+        
+        //Zawartość po rozładowaniem:
+        Console.WriteLine($"Zwartosc po rozładowaniem -> {gasContainer2}");
+        
+        //Zastąpienie kontenera na statku o danym numerze innym kontenerem
+        Console.WriteLine();
+        ContainerShip.SwitchContainers("KON-R-2",gasContainer);
+        
+        //Wypisanie specyfikacji kontererowca oraz jego zawartosci zamianie kontenerów
+        Console.WriteLine($"Zawartosc kontenerowca po zamianie -> {containerShip}");
 
     }
 }
@@ -14,14 +83,13 @@ public class Program
 public class ContainerShip
 {
     
-    private List<Container> _loadedContainers;
+    private static List<Container> _loadedContainers = new List<Container>();
     private double _maxSpeed;
     private int _maxAmountOfContainers;
     private double _maxMassOfContainers;
 
-    public ContainerShip(List<Container> loadedContainers, double maxSpeed, int maxAmountOfContainers, double maxMassOfContainers)
+    public ContainerShip(double maxSpeed, int maxAmountOfContainers, double maxMassOfContainers)
     {
-        _loadedContainers = loadedContainers;
         _maxSpeed = maxSpeed;
         _maxAmountOfContainers = maxAmountOfContainers;
         _maxMassOfContainers = maxMassOfContainers;
@@ -66,19 +134,20 @@ public class ContainerShip
         _loadedContainers.Remove(containerToRemove);
     }
 
-    public void SwitchContainers(string serialNumberToRemove, string serialNumberToAdd)
+    public static void SwitchContainers(string serialNumberToRemove, Container containerToAdd)
     {
         Container containerToRemove = Container.GetContainerBySerialNumber(serialNumberToRemove);
-        Container containerToAdd = Container.GetContainerBySerialNumber(serialNumberToAdd);
 
         foreach (var container in _loadedContainers)
         {
             if (container._serialNumber.Equals(serialNumberToRemove))
             {
-                _loadedContainers.Remove(containerToRemove); 
-                _loadedContainers.Add(containerToAdd);
+                _loadedContainers.Remove(containerToRemove);
+                
             }
         }
+        
+        _loadedContainers.Add(containerToAdd);
     }
 
     public override string ToString()
@@ -87,7 +156,10 @@ public class ContainerShip
         sb.AppendLine("Loaded Containers: [");
         foreach (var container in _loadedContainers)
         {
-            sb.AppendLine(container.ToString());
+            if (container != null)
+            {
+                sb.AppendLine(container.ToString());
+            }
         }
         sb.AppendLine($"], Max speed: {_maxSpeed}, Max amount of containers: {_maxAmountOfContainers}, Max mass of containers: {_maxMassOfContainers}");
 
@@ -103,26 +175,16 @@ public class Container
     protected double _ownWeight;
     public string _serialNumber { get; set; }
     protected double _maxLoad;
-    private static Dictionary<string, Container> containersBySerialNumber = new Dictionary<string, Container>();
+    private static Dictionary<string, Container> _containersBySerialNumber = new Dictionary<string, Container>();
 
-    public Container(double loadMass, double height, double ownWeight, double maxLoad)
+    public Container(double height, double ownWeight, double maxLoad)
     {
-        
-        if (loadMass >= 0 && loadMass <= maxLoad)
-        {
-            _loadMass = loadMass;
-        }
-        else
-        {
-            throw new OverfillException("Load mass must be non-negative and less than or equal to max load.");
-        }
-
         _height = height;
         _ownWeight = ownWeight;
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForDefaultContainer();
         _maxLoad = maxLoad;
 
-        containersBySerialNumber.Add(_serialNumber, this);
+        _containersBySerialNumber.Add(_serialNumber, this);
     }
 
     public virtual void EmptyTheLoad()
@@ -150,9 +212,9 @@ public class Container
     
     public static Container GetContainerBySerialNumber(string serialNumber)
     {
-        if (containersBySerialNumber.ContainsKey(serialNumber))
+        if (_containersBySerialNumber.ContainsKey(serialNumber))
         {
-            return containersBySerialNumber[serialNumber];
+            return _containersBySerialNumber[serialNumber];
         }
         else
         {
@@ -172,7 +234,7 @@ public class LiquidContainer : Container, IHazardNotifier
 
     private bool _isDangerLoad;
     
-    public LiquidContainer(double loadMass, double height, double ownWeight, double maxLoad, bool isDangerLoad) : base(loadMass, height, ownWeight, maxLoad)
+    public LiquidContainer(double height, double ownWeight, double maxLoad, bool isDangerLoad) : base(height, ownWeight, maxLoad)
     {
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForLiquidContainer();
         _isDangerLoad = isDangerLoad;
@@ -208,7 +270,7 @@ public class GasContainer : Container, IHazardNotifier
 
     private double _pressure;
     
-    public GasContainer(double loadMass, double height, double ownWeight, double maxLoad, double pressure) : base(loadMass, height, ownWeight, maxLoad)
+    public GasContainer(double height, double ownWeight, double maxLoad, double pressure) : base(height, ownWeight, maxLoad)
     {
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForGasContainer();
         _pressure = pressure;
@@ -237,7 +299,7 @@ public class RefrigeratedContainer : Container
     private RefrigeratedLoad _typeOfLoadToStore;
     private double _temperatureInContainer;
 
-    public RefrigeratedContainer(double loadMass, double height, double ownWeight, double maxLoad, RefrigeratedLoad typeOfLoadToStore, double temperatureInContainer) : base(loadMass, height, ownWeight, maxLoad)
+    public RefrigeratedContainer(double height, double ownWeight, double maxLoad, RefrigeratedLoad typeOfLoadToStore, double temperatureInContainer) : base(height, ownWeight, maxLoad)
     {
         if(typeOfLoadToStore == _typeOfLoadToStore)
         {
@@ -256,7 +318,7 @@ public class RefrigeratedContainer : Container
 
     public override string ToString()
     {
-        return $"{base.ToString()}, Stored load: {_typeOfLoadToStore}, Temperature in container: {_temperatureInContainer}";
+        return $"{base.ToString()}, Stored load {_typeOfLoadToStore}, Temperature in container: {_temperatureInContainer}";
     }
 }
 
