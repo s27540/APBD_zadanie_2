@@ -5,8 +5,81 @@ public class Program
     public static void Main(string[] args)
     {
 
-
+        
     }
+}
+
+public class ContainerShip
+{
+
+    private List<Container> _loadedContainers;
+    private double _maxSpeed;
+    private int _maxAmountOfContainers;
+    private double _maxMassOfContainers;
+
+    public ContainerShip(List<Container> loadedContainers, double maxSpeed, int maxAmountOfContainers, double maxMassOfContainers)
+    {
+        _loadedContainers = loadedContainers;
+        _maxSpeed = maxSpeed;
+        _maxAmountOfContainers = maxAmountOfContainers;
+        _maxMassOfContainers = maxMassOfContainers;
+    }
+
+    public void LoadListOfContainers(List<Container> containersToLoad)
+    {
+        
+        if (_loadedContainers.Count + containersToLoad.Count > _maxAmountOfContainers)
+        {
+            throw new InvalidOperationException("Adding these containers would exceed the maximum amount of containers allowed on the ship.");
+        }
+
+        double totalMassOfNewContainers = 0;
+        foreach (var container in containersToLoad)
+        {
+            totalMassOfNewContainers += container.getLoadMass();
+        }
+        
+        double totalMassCurrentContainers = 0;
+        foreach (var container in containersToLoad)
+        {
+            totalMassCurrentContainers += container.getLoadMass();
+        }
+
+        if (totalMassOfNewContainers + totalMassCurrentContainers > _maxMassOfContainers)
+        {
+            throw new InvalidOperationException("Adding these containers would exceed the maximum mass of containers allowed on the ship.");
+        }
+
+        _loadedContainers.AddRange(containersToLoad);
+    }
+
+    public void LoadContainer(Container containerToLoad)
+    {
+        List<Container> containersToAdd = new List<Container> { containerToLoad };
+        LoadListOfContainers(containersToAdd);
+    }
+
+    public void RemoveContainerFromShip(Container containerToRemove)
+    {
+        _loadedContainers.Remove(containerToRemove);
+    }
+
+    public void SwitchContainers(string serialNumberToRemove, string serialNumberToAdd)
+    {
+        
+        Container containerToRemove = Container.GetContainerBySerialNumber(serialNumberToRemove);
+        Container containerToAdd = Container.GetContainerBySerialNumber(serialNumberToAdd);
+
+        foreach (var container in _loadedContainers)
+        {
+            if (container._serialNumber.Equals(serialNumberToRemove))
+            {
+                _loadedContainers.Remove(containerToRemove);
+                _loadedContainers.Add(containerToAdd);
+            }
+        }
+    }
+
 }
 
 public class Container
@@ -14,16 +87,28 @@ public class Container
     protected double _loadMass;
     protected double _height;
     protected double _ownWeight;
-    protected string _serialNumber;
+    public string _serialNumber { get; set; }
     protected double _maxLoad;
+    private static Dictionary<string, Container> containersBySerialNumber = new Dictionary<string, Container>();
 
     public Container(double loadMass, double height, double ownWeight, double maxLoad)
     {
-        _loadMass = loadMass;
+        
+        if (loadMass >= 0 && loadMass <= _maxLoad)
+        {
+            _loadMass = loadMass;
+        }
+        else
+        {
+            throw new OverfillException("Load mass must be non-negative and less than or equal to max load.");
+        }
+
         _height = height;
         _ownWeight = ownWeight;
         _serialNumber = GenerateSerialNumber();
         _maxLoad = maxLoad;
+
+        containersBySerialNumber.Add(_serialNumber, this);
     }
 
     public virtual void EmptyTheLoad()
@@ -31,6 +116,12 @@ public class Container
         _loadMass = 0;
     }
 
+
+    public Double getLoadMass()
+    {
+        return _loadMass;
+    }
+    
     public virtual void LoadMass(double massToLoad)
     {
         if (massToLoad >= 0 && massToLoad <= _maxLoad)
@@ -42,15 +133,28 @@ public class Container
             throw new OverfillException("Load mass must be non-negative and less than or equal to max load.");
         }
     }
+    
+    public static Container GetContainerBySerialNumber(string serialNumber)
+    {
+        if (containersBySerialNumber.ContainsKey(serialNumber))
+        {
+            return containersBySerialNumber[serialNumber];
+        }
+        else
+        {
+            return null; 
+        }
+    }
 
     public string GenerateSerialNumber()
     {
 
-        
-        
-        
         return "";
     }
+    
+    
+    
+    
 }
 
 public class LiquidContainer : Container, IHazardNotifier
