@@ -74,7 +74,7 @@ public class Program
         Console.WriteLine();
         ContainerShip.SwitchContainers("KON-R-2",gasContainer);
         
-        //Wypisanie specyfikacji kontererowca oraz jego zawartosci zamianie kontenerów
+        //Wypisanie specyfikacji kontererowca oraz jego zawartosci po zamianie kontenerów
         Console.WriteLine($"Zawartosc kontenerowca po zamianie -> {containerShip}");
 
     }
@@ -136,17 +136,16 @@ public class ContainerShip
 
     public static void SwitchContainers(string serialNumberToRemove, Container containerToAdd)
     {
-        Container containerToRemove = Container.GetContainerBySerialNumber(serialNumberToRemove);
-
-        foreach (var container in _loadedContainers)
+        
+        for (int i = 0; i < _loadedContainers.Count; i++)
         {
-            if (container._serialNumber.Equals(serialNumberToRemove))
+            if (_loadedContainers[i]._serialNumber.Equals(serialNumberToRemove))
             {
-                _loadedContainers.Remove(containerToRemove);
-                
+                _loadedContainers.RemoveAt(i);
+                break;
             }
         }
-        
+
         _loadedContainers.Add(containerToAdd);
     }
 
