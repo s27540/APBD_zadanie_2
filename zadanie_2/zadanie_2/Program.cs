@@ -91,15 +91,15 @@ public class Program
 public class ContainerShip
 {
     private List<Container> _loadedContainers = new List<Container>();
-    private double _maxSpeed;
+    private double _maxSpeedKT;
     private int _maxAmountOfContainers;
-    private double _maxMassOfContainers;
+    private double _maxMassOfContainersT;
 
-    public ContainerShip(double maxSpeed, int maxAmountOfContainers, double maxMassOfContainers)
+    public ContainerShip(double maxSpeedKt, int maxAmountOfContainers, double maxMassOfContainersT)
     {
-        _maxSpeed = maxSpeed;
+        _maxSpeedKT = maxSpeedKt;
         _maxAmountOfContainers = maxAmountOfContainers;
-        _maxMassOfContainers = maxMassOfContainers;
+        _maxMassOfContainersT = maxMassOfContainersT;
     }
 
     public void LoadListOfContainers(List<Container> containersToLoad)
@@ -122,7 +122,7 @@ public class ContainerShip
             totalMassCurrentContainers += container.getLoadMass();
         }
 
-        if (totalMassOfNewContainers + totalMassCurrentContainers > _maxMassOfContainers * 1000)
+        if (totalMassOfNewContainers + totalMassCurrentContainers > _maxMassOfContainersT * 1000)
         {
             throw new InvalidOperationException("Adding these containers would exceed the maximum mass of containers allowed on the ship.");
         }
@@ -167,7 +167,7 @@ public class ContainerShip
                 sb.AppendLine(container.ToString());
             }
         }
-        sb.AppendLine($"], Max speed: {_maxSpeed}, Max amount of containers: {_maxAmountOfContainers}, Max mass of containers: {_maxMassOfContainers}");
+        sb.AppendLine($"], Max speed: {_maxSpeedKT}, Max amount of containers: {_maxAmountOfContainers}, Max mass of containers: {_maxMassOfContainersT}");
 
         return sb.ToString();
     }
