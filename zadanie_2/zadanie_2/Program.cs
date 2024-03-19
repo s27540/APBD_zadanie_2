@@ -11,18 +11,18 @@ public class Program
         //Stworzenie kontenerów danego typu
         
         //Kontener na gaz
-        GasContainer gasContainer = new GasContainer(321,231,3123131,2313);
-        GasContainer gasContainer2 = new GasContainer(321,231,3123131,2313);
+        GasContainer gasContainer = new GasContainer(321,231,3123131,1234,2313);
+        GasContainer gasContainer2 = new GasContainer(321,231,3123131,3455,2313);
         
         //Kontener na płyny
-        LiquidContainer liquidContainer = new LiquidContainer(231123,3213,3213,true);
-        LiquidContainer liquidContainer2 = new LiquidContainer(231123,3213,6000,true);
+        LiquidContainer liquidContainer = new LiquidContainer(231123,3213,3213,1234,true);
+        LiquidContainer liquidContainer2 = new LiquidContainer(231123,3213,6000,4321,true);
         
         //Kontener chłodniczy
         RefrigeratedContainer refrigeratedContainer =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, refrigeratedLoad, 21);
+            new RefrigeratedContainer( 12313, 23133123, 312313232, 5433, refrigeratedLoad, 21);
         RefrigeratedContainer refrigeratedContainer2 =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, refrigeratedLoad, 21);
+            new RefrigeratedContainer( 12313, 23133123, 312313232, 8765, refrigeratedLoad, 21);
         
         //Załadowanie kontenerów
         gasContainer.LoadMass(1000);
@@ -176,39 +176,41 @@ public class ContainerShip
 
 public class Container
 {
-    protected double _loadMass;
-    protected double _height;
-    protected double _ownWeight;
+    protected double _loadMassKG;
+    protected double _heightCM;
+    protected double _ownWeightKG;
+    private double _containerDepthCM;
     public string _serialNumber { get; set; }
-    protected double _maxLoad;
+    protected double _maxLoadKG;
     private static List<Container> _containers = new List<Container>(); 
 
-    public Container(double height, double ownWeight, double maxLoad)
+    public Container(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm)
     {
-        _height = height;
-        _ownWeight = ownWeight;
+        _heightCM = heightCm;
+        _ownWeightKG = ownWeightKg;
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForDefaultContainer();
-        _maxLoad = maxLoad;
+        _maxLoadKG = maxLoadKg;
+        _containerDepthCM = containerDepthCm;
 
         _containers.Add(this);
     }
 
     public virtual void EmptyTheLoad()
     {
-        _loadMass = 0;
+        _loadMassKG = 0;
     }
 
 
     public Double getLoadMass()
     {
-        return _loadMass;
+        return _loadMassKG;
     }
     
     public virtual void LoadMass(double massToLoad)
     {
-        if (massToLoad >= 0 && massToLoad <= _maxLoad)
+        if (massToLoad >= 0 && massToLoad <= _maxLoadKG)
         {
-            _loadMass = massToLoad;
+            _loadMassKG = massToLoad;
         }
         else
         {
@@ -231,7 +233,7 @@ public class Container
 
     public override string ToString()
     {
-        return $"Container Serial Number: {_serialNumber}, Load Mass: {_loadMass}, Height: {_height}, Own Weight: {_ownWeight}, Max Load: {_maxLoad}";
+        return $"Container Serial Number: {_serialNumber}, Load Mass: {_loadMassKG}, Height: {_heightCM}, Own Weight: {_ownWeightKG}, Max Load: {_maxLoadKG}, Container depth: {_containerDepthCM}";
     }
 
 }
@@ -240,7 +242,7 @@ public class LiquidContainer : Container, IHazardNotifier
 {
     private bool _isDangerLoad;
     
-    public LiquidContainer(double height, double ownWeight, double maxLoad, bool isDangerLoad) : base(height, ownWeight, maxLoad)
+    public LiquidContainer(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm, bool isDangerLoad) : base(heightCm, ownWeightKg, maxLoadKg, containerDepthCm)
     {
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForLiquidContainer();
         _isDangerLoad = isDangerLoad;
@@ -248,10 +250,10 @@ public class LiquidContainer : Container, IHazardNotifier
 
     public override void LoadMass(double massToLoad)
     {
-        double maxCapacity = _isDangerLoad ? _maxLoad * 0.5 : _maxLoad * 0.9;
+        double maxCapacity = _isDangerLoad ? _maxLoadKG * 0.5 : _maxLoadKG * 0.9;
         if (massToLoad >= 0 && massToLoad <= maxCapacity)
         {
-            _loadMass = massToLoad;
+            _loadMassKG = massToLoad;
         }
         else
         {
@@ -273,18 +275,18 @@ public class LiquidContainer : Container, IHazardNotifier
 
 public class GasContainer : Container, IHazardNotifier
 {
-    private double _pressure;
+    private double _pressureKPA;
     
-    public GasContainer(double height, double ownWeight, double maxLoad, double pressure) : base(height, ownWeight, maxLoad)
+    public GasContainer(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm, double pressureKpa) : base(heightCm, ownWeightKg, maxLoadKg, containerDepthCm)
     {
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForGasContainer();
-        _pressure = pressure;
+        _pressureKPA = pressureKpa;
     }
 
     public override void EmptyTheLoad()
     {
-        double massToLeaveInContainer = _loadMass * 0.05;
-        _loadMass = massToLeaveInContainer;
+        double massToLeaveInContainer = _loadMassKG * 0.05;
+        _loadMassKG = massToLeaveInContainer;
     }
 
     public void NotifyHazard()
@@ -294,7 +296,7 @@ public class GasContainer : Container, IHazardNotifier
 
     public override string ToString()
     {
-        return $"{base.ToString()}, Pressure: {_pressure}";
+        return $"{base.ToString()}, Pressure: {_pressureKPA}";
     }
 }
 
@@ -303,7 +305,7 @@ public class RefrigeratedContainer : Container
     private RefrigeratedLoad _typeOfLoadToStore;
     private double _temperatureInContainer;
 
-    public RefrigeratedContainer(double height, double ownWeight, double maxLoad, RefrigeratedLoad typeOfLoadToStore, double temperatureInContainer) : base(height, ownWeight, maxLoad)
+    public RefrigeratedContainer(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm, RefrigeratedLoad typeOfLoadToStore, double temperatureInContainer) : base(heightCm, ownWeightKg, maxLoadKg, containerDepthCm)
     {
         if(typeOfLoadToStore == _typeOfLoadToStore)
         {
