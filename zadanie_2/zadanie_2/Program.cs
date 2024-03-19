@@ -6,7 +6,7 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        RefrigeratedLoad rl= new RefrigeratedLoad("Banana", -13);
+        RefrigeratedLoad refrigeratedLoad= new RefrigeratedLoad("Banana", -13);
 
         //Stworzenie kontenerów danego typu
         
@@ -20,9 +20,9 @@ public class Program
         
         //Kontener chłodniczy
         RefrigeratedContainer refrigeratedContainer =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, rl, 21);
+            new RefrigeratedContainer( 12313, 23133123, 312313232, refrigeratedLoad, 21);
         RefrigeratedContainer refrigeratedContainer2 =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, rl, 21);
+            new RefrigeratedContainer( 12313, 23133123, 312313232, refrigeratedLoad, 21);
         
         //Załadowanie kontenerów
         gasContainer.LoadMass(1000);
@@ -50,40 +50,47 @@ public class Program
         containerShip.LoadContainer(refrigeratedContainer2);
         
         //Wypisanie specyfikacji kontererowca oraz jego zawartosci
-        Console.WriteLine(containerShip);
+        Console.WriteLine($"Kontenerowiec po dodaniu listy oraz pojedynczych kontenerów -> {containerShip}");
         
-        //Usunięcie kontenera z kontenerowca
+        //Usunięcie kontenerów z kontenerowca
         containerShip.RemoveContainerFromShip(gasContainer);
         containerShip.RemoveContainerFromShip(liquidContainer);
         containerShip.RemoveContainerFromShip(refrigeratedContainer);
         
         //Wypisanie specyfikacji kontererowca oraz jego zawartosci po usunięciu kontenerów
-        Console.WriteLine(containerShip);
+        Console.WriteLine($"Kontenerowiec po usunięciu kontenerów z kontenerowca -> {containerShip}");
 
 
         //Zawartość przed rozładowaniem:
-        Console.WriteLine($"Zwartosc przed rozładowaniem -> {gasContainer2}");
+        Console.WriteLine($"Zwartosc kontenera z gazem przed rozładowaniem -> {gasContainer2}");
         
         //Rozładowanie kontenera
         gasContainer2.EmptyTheLoad();
         
         //Zawartość po rozładowaniem:
-        Console.WriteLine($"Zwartosc po rozładowaniem -> {gasContainer2}");
+        Console.WriteLine($"Zwartosc kontenera z gazem po rozładowaniem -> {gasContainer2}");
         
-        //Zastąpienie kontenera na statku o danym numerze innym kontenerem
+        //Zastąpienie kontenera na statku o danym numerze seryjnym innym kontenerem
         Console.WriteLine();
-        ContainerShip.SwitchContainers("KON-R-2",gasContainer);
+        containerShip.SwitchContainers("KON-R-2",gasContainer);
         
         //Wypisanie specyfikacji kontererowca oraz jego zawartosci po zamianie kontenerów
         Console.WriteLine($"Zawartosc kontenerowca po zamianie -> {containerShip}");
 
+        //Przeniesienie kontenera miedzy dwoma statkami
+        ContainerShip containerShip2 = new ContainerShip(23,76777778,777777);
+        containerShip.RemoveContainerFromShip(liquidContainer2);
+        containerShip2.LoadContainer(liquidContainer2);
+        
+        //Wypisanie specyfikacji dwóch kontenerowców oraz jego zawartośći po przenisieniu kontenera z jedngo kontenerowca do drugiego
+        Console.WriteLine($"Zawartosc kontenerowca nr 1 po przeniesieniu -> {containerShip}");
+        Console.WriteLine($"Zawartosc kontenerowca nr 2 po przeniesieniu -> {containerShip2}");
     }
 }
 
 public class ContainerShip
 {
-    
-    private static List<Container> _loadedContainers = new List<Container>();
+    private List<Container> _loadedContainers = new List<Container>();
     private double _maxSpeed;
     private int _maxAmountOfContainers;
     private double _maxMassOfContainers;
@@ -134,7 +141,7 @@ public class ContainerShip
         _loadedContainers.Remove(containerToRemove);
     }
 
-    public static void SwitchContainers(string serialNumberToRemove, Container containerToAdd)
+    public void SwitchContainers(string serialNumberToRemove, Container containerToAdd)
     {
         
         for (int i = 0; i < _loadedContainers.Count; i++)
@@ -174,7 +181,7 @@ public class Container
     protected double _ownWeight;
     public string _serialNumber { get; set; }
     protected double _maxLoad;
-    private static Dictionary<string, Container> _containersBySerialNumber = new Dictionary<string, Container>();
+    private static List<Container> _containers = new List<Container>(); 
 
     public Container(double height, double ownWeight, double maxLoad)
     {
@@ -183,7 +190,7 @@ public class Container
         _serialNumber = SerialNumberGenerator.GenerateSerialNumberForDefaultContainer();
         _maxLoad = maxLoad;
 
-        _containersBySerialNumber.Add(_serialNumber, this);
+        _containers.Add(this);
     }
 
     public virtual void EmptyTheLoad()
@@ -211,14 +218,15 @@ public class Container
     
     public static Container GetContainerBySerialNumber(string serialNumber)
     {
-        if (_containersBySerialNumber.ContainsKey(serialNumber))
+        for (int i = 0; i < _containers.Count; i++)
         {
-            return _containersBySerialNumber[serialNumber];
+            if (_containers[i]._serialNumber.Equals(serialNumber))
+            {
+                return _containers[i];
+            }
         }
-        else
-        {
-            return null; 
-        }
+
+        return null;
     }
 
     public override string ToString()
@@ -230,7 +238,6 @@ public class Container
 
 public class LiquidContainer : Container, IHazardNotifier
 {
-
     private bool _isDangerLoad;
     
     public LiquidContainer(double height, double ownWeight, double maxLoad, bool isDangerLoad) : base(height, ownWeight, maxLoad)
@@ -266,7 +273,6 @@ public class LiquidContainer : Container, IHazardNotifier
 
 public class GasContainer : Container, IHazardNotifier
 {
-
     private double _pressure;
     
     public GasContainer(double height, double ownWeight, double maxLoad, double pressure) : base(height, ownWeight, maxLoad)
@@ -294,7 +300,6 @@ public class GasContainer : Container, IHazardNotifier
 
 public class RefrigeratedContainer : Container
 {
-
     private RefrigeratedLoad _typeOfLoadToStore;
     private double _temperatureInContainer;
 
@@ -322,7 +327,7 @@ public class RefrigeratedContainer : Container
 }
 
 public class Load
-{
+{ 
     public string _name { get; set; }
 
     public Load(string name)
