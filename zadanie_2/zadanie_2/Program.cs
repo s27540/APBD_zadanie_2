@@ -89,61 +89,6 @@ public class Program
     }
 }
 
-public class GasContainer : Container, IHazardNotifier
-{
-    private double _pressureKPA;
-    
-    public GasContainer(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm, double pressureKpa) : base(heightCm, ownWeightKg, maxLoadKg, containerDepthCm)
-    {
-        _serialNumber = SerialNumberGenerator.GenerateSerialNumberForGasContainer();
-        _pressureKPA = pressureKpa;
-    }
-
-    public override void EmptyTheLoad()
-    {
-        double massToLeaveInContainer = _loadMassKG * 0.05;
-        _loadMassKG = massToLeaveInContainer;
-    }
-
-    public void NotifyHazard()
-    {
-        Console.WriteLine($"Hazard notification for container {_serialNumber}: Danger detected!");
-    }
-
-    public override string ToString()
-    {
-        return $"{base.ToString()}, Pressure: {_pressureKPA}";
-    }
-}
-
-public class RefrigeratedContainer : Container
-{
-    private RefrigeratedLoad _typeOfLoadToStore;
-    private double _temperatureInContainer;
-
-    public RefrigeratedContainer(double heightCm, double ownWeightKg, double maxLoadKg, double containerDepthCm, RefrigeratedLoad typeOfLoadToStore, double temperatureInContainer) : base(heightCm, ownWeightKg, maxLoadKg, containerDepthCm)
-    {
-        if(typeOfLoadToStore == _typeOfLoadToStore)
-        {
-            throw new ArgumentException("RefrigeratedContainer can only store products of the same type.");
-        }
-
-        if (_temperatureInContainer < typeOfLoadToStore._requiredTemperature)
-        {
-            throw new ArgumentException("RefrigeratedContainer temperature can't be lower than product required temperature.");
-        }
-
-        _serialNumber = SerialNumberGenerator.GenerateSerialNumberForRefrigeratedContainer();
-        _typeOfLoadToStore = typeOfLoadToStore;
-        _temperatureInContainer = temperatureInContainer;
-    }
-
-    public override string ToString()
-    {
-        return $"{base.ToString()}, Stored load {_typeOfLoadToStore}, Temperature in container: {_temperatureInContainer}";
-    }
-}
-
 public class Load
 { 
     public string _name { get; set; }
