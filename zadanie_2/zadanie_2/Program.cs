@@ -88,7 +88,6 @@ public class Program
         Console.WriteLine($"Zawartosc kontenerowca nr 2 po przeniesieniu -> {containerShip2}");
     }
 }
-
 public class LiquidContainer : Container, IHazardNotifier
 {
     private bool _isDangerLoad;
