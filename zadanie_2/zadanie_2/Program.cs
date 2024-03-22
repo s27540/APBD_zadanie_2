@@ -88,11 +88,3 @@ public class Program
         Console.WriteLine($"Zawartosc kontenerowca nr 2 po przeniesieniu -> {containerShip2}");
     }
 }
-
-public class OverfillException : Exception
-{ 
-    public OverfillException(string message) : base (message)
-    {
-        
-    }
-}
