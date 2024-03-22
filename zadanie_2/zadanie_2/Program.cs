@@ -89,21 +89,6 @@ public class Program
     }
 }
 
-public class Load
-{ 
-    public string _name { get; set; }
-
-    public Load(string name)
-    {
-        _name = name;
-    }
-
-    public override string ToString()
-    {
-        return $"Name : {_name}";
-    }
-}
-
 public class RefrigeratedLoad : Load
 {
     public double _requiredTemperature { get; set; }
