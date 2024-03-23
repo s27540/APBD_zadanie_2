@@ -12,18 +12,18 @@ public class Program
         //Stworzenie kontenerów danego typu
         
         //Kontener na gaz
-        GasContainer gasContainer = new GasContainer(321,231,3123131,1234,2313);
-        GasContainer gasContainer2 = new GasContainer(321,231,3123131,3455,2313);
+        GasContainer gasContainer = new GasContainer(3215,231,3123131,1234,2313);
+        GasContainer gasContainer2 = new GasContainer(3214,231,3123131,3455,2313);
         
         //Kontener na płyny
-        LiquidContainer liquidContainer = new LiquidContainer(231123,3213,3213,1234,true);
-        LiquidContainer liquidContainer2 = new LiquidContainer(231123,3213,6000,4321,true);
+        LiquidContainer liquidContainer = new LiquidContainer(231123,3213,32137,1234,true);
+        LiquidContainer liquidContainer2 = new LiquidContainer(231123,3213,60000,4321,true);
         
         //Kontener chłodniczy
         RefrigeratedContainer refrigeratedContainer =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, 5433, refrigeratedLoad, 21);
+            new RefrigeratedContainer( 12313, 23133123, 31231, 5433, refrigeratedLoad, 21);
         RefrigeratedContainer refrigeratedContainer2 =
-            new RefrigeratedContainer( 12313, 23133123, 312313232, 8765, refrigeratedLoad, 21);
+            new RefrigeratedContainer( 12313, 23133123, 33765, 8765, refrigeratedLoad, 21);
         
         //Załadowanie kontenerów
         gasContainer.LoadMass(1000);
@@ -34,7 +34,7 @@ public class Program
         refrigeratedContainer2.LoadMass(2000);
 
         //Swtorzenie kontenerowca
-        ContainerShip containerShip = new ContainerShip(23,2132313,2313123213213);
+        ContainerShip containerShip = new ContainerShip(23,213231,2313);
         
         //Stworzenie listy na kontenery i dodanie do niej paru kontenerów
         List<Container> containers = new List<Container>();
@@ -79,7 +79,7 @@ public class Program
         Console.WriteLine($"Zawartosc kontenerowca po zamianie -> {containerShip}");
 
         //Przeniesienie kontenera miedzy dwoma statkami
-        ContainerShip containerShip2 = new ContainerShip(23,76777778,777777);
+        ContainerShip containerShip2 = new ContainerShip(23,767777,777777);
         containerShip.RemoveContainerFromShip(liquidContainer2);
         containerShip2.LoadContainer(liquidContainer2);
         
